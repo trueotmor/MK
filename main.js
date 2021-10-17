@@ -37,51 +37,50 @@ const weapons = new Set([
 ]);
 const getRandomWeapon = () => getRandomElement(weapons);
 
-const player1Name = getRandomName();
-const player1 = {
-  name: player1Name,
-  hp: getRandomInteger(0, 100),
-  img: getImage(fighters, player1Name),
+const playerOneName = getRandomName();
+const playerOne = {
+  player: 1,
+  name: playerOneName,
+  hp: 100,
+  img: getImage(fighters, playerOneName),
   weapon: getRandomWeapon(),
   attack: () => {
     console.log(this.name + "Fight...");
   },
 };
 
-const player2Name = getRandomName();
-const player2 = {
-  name: player2Name,
-  hp: getRandomInteger(0, 100),
-  img: getImage(fighters, player2Name),
+const playerTwoName = getRandomName();
+const playerTwo = {
+  player: 2,
+  name: playerTwoName,
+  hp: 100,
+  img: getImage(fighters, playerTwoName),
   weapon: getRandomWeapon(),
   attack: () => {
     console.log(this.name + "Fight...");
   },
 };
 
-const createPlayer = (gamer, char) => {
-  const arena = document.querySelector(".arenas");
+const arena = document.querySelector(".arenas");
+const randomButton = document.querySelector(".button");
 
-  const player = document.createElement("div");
-  player.classList.add(gamer);
+const createElement = (tag, className) => {
+  const newTag = document.createElement(tag);
+  if (className) {
+    newTag.classList.add(className);
+  }
 
-  const progressBar = document.createElement("div");
-  progressBar.classList.add("progressbar");
+  return newTag;
+};
 
-  const character = document.createElement("div");
-  character.classList.add("character");
-
-  const life = document.createElement("div");
-  life.classList.add("life");
-
-  const name = document.createElement("div");
-  name.classList.add("name");
-
+const createPlayer = (char) => {
+  const player = createElement("div", "player" + char.player);
+  const progressBar = createElement("div", "progressbar");
+  const character = createElement("div", "character");
+  const life = createElement("div", "life");
+  const name = createElement("div", "name");
   const image = document.createElement("img");
   image.src = char.img;
-
-  arena.appendChild(player);
-
   player.appendChild(progressBar);
   player.appendChild(character);
   progressBar.appendChild(life);
@@ -90,7 +89,54 @@ const createPlayer = (gamer, char) => {
 
   life.style.width = char.hp + "%";
   name.innerHTML = char.name;
+  return player;
 };
 
-createPlayer("player1", player1);
-createPlayer("player2", player2);
+const playerWin = (name) => {
+  const loseTitle = createElement("div", "loseTitle");
+  loseTitle.innerHTML = name + " WIN";
+
+  return loseTitle;
+};
+
+const changeHP = (player1, player2) => {
+  const player1Life = document.querySelector(
+    ".player" + player1.player + " .life"
+  );
+
+  const player2Life = document.querySelector(
+    ".player" + player2.player + " .life"
+  );
+
+  player1.hp -= getRandomInteger(1, 20);
+  player2.hp -= getRandomInteger(1, 20);
+
+  if (player1.hp <= 0) {
+    player1.hp = 0;
+  }
+
+  if (player2.hp <= 0) {
+    player2.hp = 0;
+  }
+
+  player1Life.style.width = player1.hp + "%";
+  player2Life.style.width = player2.hp + "%";
+
+  if (player1.hp && player2.hp == 0) {
+    randomButton.setAttribute("disabled", true);
+    arena.appendChild(playerWin("NOBODY"));
+  } else if (player2.hp == 0) {
+    arena.appendChild(playerWin(player1.name));
+    randomButton.setAttribute("disabled", true);
+  } else if (player1.hp == 0) {
+    arena.appendChild(playerWin(player2.name));
+    randomButton.setAttribute("disabled", true);
+  }
+};
+
+randomButton.addEventListener("click", () => {
+  changeHP(playerOne, playerTwo);
+});
+
+arena.appendChild(createPlayer(playerOne));
+arena.appendChild(createPlayer(playerTwo));
